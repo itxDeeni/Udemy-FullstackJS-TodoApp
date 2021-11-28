@@ -4,7 +4,9 @@ let mongodb = require("mongodb")
 let app = express()
 let db
 
-let connectionString = "mongodb+srv://itxdeeni:Bud3M1n@cluster0.ahvrl.mongodb.net/TodoApp?retryWrites=true&w=majority"
+app.use(express.static('public'))
+
+let connectionString = 'mongodb+srv://itxdeeni:Bud3M1n@cluster0.ahvrl.mongodb.net/TodoApp?retryWrites=true&w=majority'
 mongodb.connect(connectionString,{useNewUrlParser : true},(err,client)=>{
    db = client.db()
    app.listen(4000) 
@@ -14,9 +16,7 @@ app.use(express.urlencoded({extended:false}))
 
 app.get('/',(req,res)=>{
     db.collection('items').find().toArray((err,items)=>{
-        console.log(items);
-    })
-    res.send(`<!DOCTYPE html>
+        res.send(`<!DOCTYPE html>
     <html>
     <head>
       <meta charset="UTF-8">
@@ -38,7 +38,7 @@ app.get('/',(req,res)=>{
         </div>
         
         <ul class="list-group pb-5">
-        ${items.map(function(item){
+        ${ items.map(function(item){
             return `<li class="list-group-item list-group-item-action d-flex align-items-center justify-content-between">
             <span class="item-text">${item.text}</span>
             <div>
@@ -50,9 +50,11 @@ app.get('/',(req,res)=>{
         </ul>
         
       </div>
-      
+      <script src="/browser.js"></script>
     </body>
     </html>`)
+    })
+    
 })
 
 app.post('/create-item',(req,res)=>{
