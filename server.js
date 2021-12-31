@@ -1,5 +1,7 @@
 let express = require('express')
 let mongodb = require("mongodb")
+const { default: axios } = require("axios")
+
 
 let app = express()
 let db
@@ -9,9 +11,12 @@ app.use(express.static('public'))
 let connectionString = 'mongodb+srv://itxdeeni:Bud3M1n@cluster0.ahvrl.mongodb.net/TodoApp?retryWrites=true&w=majority'
 mongodb.connect(connectionString,{useNewUrlParser : true},(err,client)=>{
    db = client.db()
-   app.listen(4000) 
+   app.listen(4000,()=>{
+       console.log("listening on port 4000")
+   }) 
 })
 
+app.use(express.json())
 app.use(express.urlencoded({extended:false}))
 
 app.get('/',(req,res)=>{
@@ -42,14 +47,16 @@ app.get('/',(req,res)=>{
             return `<li class="list-group-item list-group-item-action d-flex align-items-center justify-content-between">
             <span class="item-text">${item.text}</span>
             <div>
-              <button class="edit-me btn btn-secondary btn-sm mr-1">Edit</button>
-              <button class="delete-me btn btn-danger btn-sm">Delete</button>
+              <button data-id="${item._id}" class="edit-me btn btn-secondary btn-sm mr-1">Edit</button>
+              <button data-id="${item._id}" class="delete-me btn btn-danger btn-sm">Delete</button>
             </div>
           </li>`
         }).join('')}
         </ul>
         
       </div>
+      
+      <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
       <script src="/browser.js"></script>
     </body>
     </html>`)
@@ -62,4 +69,16 @@ app.post('/create-item',(req,res)=>{
         res.redirect('/')
     })
     
+})
+
+app.post('/update-item',(req,res)=>{
+    db.collection('items').findOneAndUpdate({_id: new mongodb.ObjectId(req.body.id)},{$set:{text:req.body.text}},()=>{
+        res.send("Success")
+    })
+})
+
+app.post('/delete-item',  function(req,res){
+    db.collection('items').deleteOne({_id: new mongodb.ObjectId(req.body.id)},{$set:{text:req.body.text}},function(){
+        res.send('Success')
+    })
 })
